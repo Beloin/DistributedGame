@@ -4,4 +4,4 @@ project(distributed_sys C)
 set(CMAKE_C_STANDARD 11)
 
 add_executable(distributed_sys
-        src/server.c)
+        src/client.c)
