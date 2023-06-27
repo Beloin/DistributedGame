@@ -18,6 +18,6 @@ To achieve this Goal the programmer has two ways to implement it:
 
 For both the implementations will be needed a "start" point. Which means a connecting point to enter to that distribuited group.
 
-
 ## The implementation
 
+Each `player` will have a server code and a client code, so it can reach out to other players and communicate it's position.
