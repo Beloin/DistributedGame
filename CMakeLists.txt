@@ -8,4 +8,4 @@ add_executable(
         src/main.c
         src/client.c
         src/server.c
-        src/utils/addr_utils.c src/utils/addr_utils.h src/player/player.c src/player/player.h)
+        src/utils/addr_utils.c src/utils/addr_utils.h src/player/player.c src/player/player.h src/game/game.c src/game/game.h)
