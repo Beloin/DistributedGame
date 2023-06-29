@@ -6,13 +6,15 @@
 #include <unistd.h>
 #include <errno.h>
 #include <string.h>
-#include <sys/types.h>
 #include <sys/socket.h>
 #include <netinet/in.h>
 #include <netdb.h>
 #include <arpa/inet.h>
 #include <sys/wait.h>
 #include <signal.h>
+
+#include "utils/addr_utils.h"
+
 
 #define PORT "3490"
 #define BACKLOG 10
@@ -26,15 +28,8 @@ void sigchld_handler(int s) {
     errno = saved_errno;
 }
 
-void *get_in_addr(struct sockaddr *sa) {
-    if (sa->sa_family == AF_INET) {
-        return &(((struct sockaddr_in*)sa)->sin_addr);
-    }
 
-    return &(((struct sockaddr_in6*)sa)->sin6_addr);
-}
-
-int main() {
+int server() {
     int sockfd, new_fd;
     struct addrinfo hints, *servinfo, *p;
     struct sockaddr_storage their_addr;
