@@ -21,3 +21,13 @@ For both the implementations will be needed a "start" point. Which means a conne
 ## The implementation
 
 Each `player` will have a server code and a client code, so it can reach out to other players and communicate it's position.
+
+Will be needed a main server to act as a "DNS" server, so this brings a questions, since it's necessary a DNS server, why don't use a centralized option?
+
+Main Modules:
+1. Player
+2. Client:
+    - Involving how the communication will work, centralized or not. 
+3. Server
+    - Involving how the communication will work, centralized or not. 
+
