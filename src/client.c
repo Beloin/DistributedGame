@@ -12,8 +12,7 @@
 #include <sys/socket.h>
 
 #include <arpa/inet.h>
-
-#include "utils/addr_utils.h"
+#include "addr_utils.h"
 
 #define PORT "3490" // the port client will be connecting to
 

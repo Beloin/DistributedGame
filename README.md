@@ -2,6 +2,8 @@
 
 A distributed `Small Game` using OpenGL and Linux native Socket connections.
 
+In this project was implemented software tests using CMake.
+
 ## The Game
 
 A simple triangle controller game. Each player will be a triangle running in a 500x500 screen. The player can move up, down to the left and right `(🡑 🡓 🡐 🡒)`. The important thing here is the distributed part, where there's not going to have a main server, every user will connect to each other and talk his place to everyone.
