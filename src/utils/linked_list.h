@@ -7,27 +7,41 @@
 
 #include "stdlib.h"
 
-typedef struct {
+struct Node {
     void *value;
     struct Node *next;
     struct Node *prev;
-} Node;
+};
 
 typedef struct {
-    Node *head;
-    int len;
-    unsigned char max_size;
+    struct Node *head;
+    unsigned int len;
+    unsigned long max_size;
 } LinkedList;
 
 void create_linked_list(LinkedList *linkedList);
 
-void free_linked_list(LinkedList *linkedList);
+void print_linked_list_info(LinkedList *linkedList);
+
+void free_linked_list_nodes(LinkedList *linkedList);
 
 int add_item(LinkedList *linkedList, void *item);
 
-void remove_node(LinkedList *linkedList, int n);
+/**
+ *
+ * This frees the node, but don't actually free the value inside it. A better approach should be `get_node`, so the user
+ * can have the Node to properly free it and free the value.
+ *
+ * @param linkedList
+ * @param n
+ * @return 0 OK
+ * @return 1 Error
+ */
+int remove_node(LinkedList *linkedList, int n);
 
-void get_item(LinkedList *linkedList, int index, void *p);
+int get_node(LinkedList *linkedList, int i, struct Node *node);
+
+int peek_node(LinkedList *linkedList, int i, struct Node *node);
 
 
 #endif //DISTRIBUTED_SYS_LINKED_LIST_H
