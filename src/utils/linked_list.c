@@ -4,6 +4,7 @@
 
 #include "linked_list.h"
 #include "stdio.h"
+#include "stdlib.h"
 #include "math.h"
 
 void create_linked_list(LinkedList *linkedList) {

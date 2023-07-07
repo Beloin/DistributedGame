@@ -17,11 +17,7 @@ add_library(
         src/utils/linked_list.c
         src/utils/addr_utils.c
 )
-
 target_include_directories(utils_lib PUBLIC src/utils)
-
-option(TEST_LINKED_LIST "Linked List Tests" ON)
-
 
 include(FetchContent)
 FetchContent_Declare(
@@ -31,11 +27,11 @@ FetchContent_Declare(
 )
 # For Windows: Prevent overriding the parent project's compiler/linker settings
 set(gtest_force_shared_crt ON CACHE BOOL "" FORCE)
-FetchContent_MakeAvailable(googletest)
+FetchContent_MakeAvailable(googletest) # This makes available the lib `gtest_main`
 
-# target_link_libraries(distributed_sys gtest_main)
-target_link_libraries(distributed_sys PUBLIC utils_lib)
-
+option(TEST_LINKED_LIST "Linked List Tests" ON)
 if (TEST_LINKED_LIST)
     add_subdirectory(tests)
 endif ()
+
+target_link_libraries(distributed_sys PUBLIC utils_lib)

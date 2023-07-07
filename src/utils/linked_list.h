@@ -5,8 +5,6 @@
 #ifndef DISTRIBUTED_SYS_LINKED_LIST_H
 #define DISTRIBUTED_SYS_LINKED_LIST_H
 
-#include "stdlib.h"
-
 struct Node {
     void *value;
     struct Node *next;
