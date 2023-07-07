@@ -109,7 +109,11 @@ int get_node(LinkedList *linkedList, int i, struct Node *node) {
 
     if (index == 0) {
         linkedList->head = cur_node->next;
-        cur_node->next->prev = NULL;
+
+        if (cur_node->next != NULL) {
+            cur_node->next->prev = NULL;
+        }
+
     } else {
         cur_node->prev->next = cur_node->next;
 
@@ -118,6 +122,7 @@ int get_node(LinkedList *linkedList, int i, struct Node *node) {
         }
     }
 
+    linkedList->len--;
     free(cur_node);
 
     return 0;

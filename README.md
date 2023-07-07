@@ -19,10 +19,10 @@ To achieve this Goal the programmer has two ways to implement it:
       them fails to respond.
     - This option will help when having a shared resource.
 1. Full distribuited option:
-    - Wont have any coordenator, each change in places should be spread across every client (see distributed
+    - Won't have any coordenator, each change in places should be spread across every client (see distributed
       algorithms).
     - The places should be acted as a resource, so it can be the same across the clients.
-    - Will be slower, but wont need the voting algorithm.
+    - Will be slower, but won't need the voting algorithm.
 
 For both the implementations will be needed a "start" point. Which means a connecting point to enter to that
 distribuited group.
@@ -46,3 +46,7 @@ Main Modules:
 4. Server
     - Involving how the communication will work, centralized or not. 
 
+
+## TODO:
+
+- What about create a docker with it?
