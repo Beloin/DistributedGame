@@ -59,6 +59,8 @@ void free_linked_list_nodes(LinkedList *linkedList) {
         cur_node = cur_node->next;
         free(temp);
     }
+
+    linkedList->head = NULL;
 }
 
 int remove_node(LinkedList *linkedList, int n) {
@@ -89,7 +91,7 @@ int remove_node(LinkedList *linkedList, int n) {
 
     linkedList->len--;
 
-    return n;
+    return 0;
 }
 
 int get_node(LinkedList *linkedList, int i, struct Node *node) {
