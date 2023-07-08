@@ -6,17 +6,18 @@
 #define DISTRIBUTED_SYS_GAME_H
 
 #include "../player/player.h"
+#include "linked_list.h"
 
 typedef struct {
     int i, j;
-    float *mx;
-    Player **players; // TODO: Use a linked list
-} Matrix;
+    LinkedList players; // TODO: Use a linked list
+} Game;
 
-void create_matrix(Matrix *matrix, int i, int j);
-void free_matrix(Matrix *matrix);
 
 // TODO: Make sense use a matrix to update the screen? Or is better to act only as a list of itens
-void add_player();
+void create_game(Game *game);
+void delete_game(Game *game, char should_free_pointers);
+
+void add_player(Game *game, Player *player);
 
 #endif //DISTRIBUTED_SYS_GAME_H

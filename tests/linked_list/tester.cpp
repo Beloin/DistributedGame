@@ -76,9 +76,26 @@ TEST(LinkedListTests, should_free_all_linked_list) {
     add_item(&linkedList, &v2);
     add_item(&linkedList, &v3);
 
-    free_linked_list_nodes(&linkedList);
+    delete_linked_list(&linkedList, 0);
     void *pointer_to_throw;
     ASSERT_EXIT((pointer_to_throw = linkedList.head->value), ::testing::KilledBySignal(SIGSEGV), ".*");
+    ASSERT_EQ((void *) NULL, linkedList.head) << "Head should be null";
+}
+
+TEST(LinkedListTests, should_free_all_linked_list_freeing_the_value) {
+    LinkedList linkedList;
+    float *v1 =  (float *) malloc(sizeof(float));
+    *v1 = 12;
+    create_linked_list(&linkedList);
+
+    add_item(&linkedList, v1);
+
+    delete_linked_list(&linkedList, 1);
+    void *pointer_to_throw;
+    ASSERT_EXIT((pointer_to_throw = linkedList.head->value), ::testing::KilledBySignal(SIGSEGV), ".*");
+
+    ASSERT_NE(12, *v1) << "Freed value is not equals itself";
+
     ASSERT_EQ((void *) NULL, linkedList.head) << "Head should be null";
 }
 

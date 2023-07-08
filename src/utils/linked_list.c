@@ -51,12 +51,17 @@ int add_item(LinkedList *linkedList, void *item) {
     return index;
 }
 
-void free_linked_list_nodes(LinkedList *linkedList) {
+void delete_linked_list(LinkedList *linkedList, char should_free_values) {
     struct Node *cur_node;
     cur_node = linkedList->head;
     while (cur_node != NULL) {
         struct Node *temp = cur_node;
         cur_node = cur_node->next;
+
+        if (should_free_values) {
+            free(temp->value);
+        }
+
         free(temp);
     }
 

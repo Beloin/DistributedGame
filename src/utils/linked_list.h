@@ -19,9 +19,9 @@ typedef struct {
 
 void create_linked_list(LinkedList *linkedList);
 
-void print_linked_list_info(LinkedList *linkedList);
+void delete_linked_list(LinkedList *linkedList, char should_free_values);
 
-void free_linked_list_nodes(LinkedList *linkedList);
+void print_linked_list_info(LinkedList *linkedList);
 
 int add_item(LinkedList *linkedList, void *item);
 
