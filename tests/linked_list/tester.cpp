@@ -99,8 +99,29 @@ TEST(LinkedListTests, should_remove_second_node) {
     ASSERT_NE((void *) NULL, linkedList.head) << "Head should not be null";
     ASSERT_EQ(v1, *((float *) linkedList.head->value)) << "Head should not be null";
 
+    ASSERT_EQ(2, linkedList.len) << "Linked list size should 2";
+
     ASSERT_NE((void *) NULL, linkedList.head->next) << "Next should not be null";
-    ASSERT_EQ(v3, *((float *) linkedList.head->next)) << "Next should have the third value";
+    ASSERT_EQ(v3, *((float *) linkedList.head->next->value)) << "Next should have the third value";
 
     ASSERT_EQ((void *) NULL, linkedList.head->next->next) << "The third one should be Null since it is now the second";
+}
+
+TEST(LinkedListTests, should_peek_second_node) {
+    LinkedList linkedList;
+    float v1 = 12.F;
+    float v2 = 17.F;
+    float v3 = 45.F;
+
+    create_linked_list(&linkedList);
+    add_item(&linkedList, &v1);
+    add_item(&linkedList, &v2);
+    add_item(&linkedList, &v3);
+
+    struct Node node{};
+    int err = peek_node(&linkedList, 1, &node);
+    ASSERT_EQ(0, err) << "err: Cannot find node";
+
+    ASSERT_EQ(3, linkedList.len) << "Should not remove any node";
+    ASSERT_EQ(v2, *((float *) node.value)) << "Value is not accessed";
 }
