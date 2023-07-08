@@ -11,7 +11,6 @@ TEST(LinkedListTests, should_add_one_item) {
     float p = 12.F;
 
     create_linked_list(&linkedList);
-    print_linked_list_info(&linkedList);
     add_item(&linkedList, &p);
 
     ASSERT_EQ(1, linkedList.len) << "Length was not modified";
@@ -23,7 +22,6 @@ TEST(LinkedListTests, should_get_first_node_when_theres_one) {
     float p = 12.F;
 
     create_linked_list(&linkedList);
-    print_linked_list_info(&linkedList);
     add_item(&linkedList, &p);
 
     struct Node node{};
@@ -41,7 +39,6 @@ TEST(LinkedListTests, should_get_second_node) {
     float v3 = 45.F;
 
     create_linked_list(&linkedList);
-    print_linked_list_info(&linkedList);
 
     add_item(&linkedList, &v1);
     add_item(&linkedList, &v2);
