@@ -6,7 +6,7 @@
 #define DISTRIBUTED_SYS_PLAYER_H
 
 typedef struct {
-    float x, y;
+    int x, y;
 } Point;
 
 typedef struct  {
