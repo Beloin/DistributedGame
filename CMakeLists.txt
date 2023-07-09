@@ -6,6 +6,7 @@ set(CMAKE_C_STANDARD 11)
 add_executable(
         distributed_sys
         src/main.c
+        src/main.c
         src/client.c
         src/server.c
         src/player/player.c src/player/player.h
