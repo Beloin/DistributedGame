@@ -40,9 +40,8 @@ int main(int argc, char **argv) {
     create_game(&game);
     add_player(&game, me);
 
-    pthread_create(&server_thread, NULL, server_worker, argv[1]);
-
-//    client("3092");
+//    pthread_create(&server_thread, NULL, server_worker, argv[1]);
+    client("3092");
 
     pthread_join(server_thread, NULL);
     delete_game(&game, 1);

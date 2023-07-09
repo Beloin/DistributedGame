@@ -105,14 +105,15 @@ int server(char *port) {
         printf("server: got connection from %s\n", s);
 
         if (!fork()) {
-            close(sockfd);
-            // We will keep this connection and work with it
-            if (send(new_fd, "Hello, World!", 13, 0)) {
+            ssize_t b;
+            // We will keep this connection and work with it...
+            if ((b = send(new_fd, "Hello, World!", 13, 0)) == -1) {
                 perror("send");
+            } else {
+                printf("server: sent %ld bytes\n", b);
             }
 
             close(new_fd);
-            exit(0);
         }
 
         close(new_fd);
