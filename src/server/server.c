@@ -13,10 +13,9 @@
 #include <sys/wait.h>
 #include <signal.h>
 
-#include "utils/addr_utils.h"
+#include "addr_utils.h"
 
 
-#define PORT "3490"
 #define BACKLOG 10
 
 // SEE TUTORIAL HERE: https://beej.us/guide/bgnet/html//index.html#cb47-20
@@ -29,7 +28,7 @@ void sigchld_handler(int s) {
 }
 
 
-int server() {
+int server(char *port) {
     int sockfd, new_fd;
     struct addrinfo hints, *servinfo, *p;
     struct sockaddr_storage their_addr;
@@ -45,25 +44,35 @@ int server() {
     hints.ai_socktype = SOCK_STREAM;
     hints.ai_flags = AI_PASSIVE;
 
-    if ((rv = getaddrinfo(NULL, "3090", &hints, &servinfo)) != 0) {
+    char *name = "0.0.0.0"; // Could be localhost too. But since we are using AI_PASSIVE, the host is the same machine as this
+    if ((rv = getaddrinfo(NULL, port, &hints, &servinfo)) != 0) {
         fprintf(stderr, "getaddrinfo: %s\n", gai_strerror(rv));
     }
 
     for (p = servinfo; p != NULL; p = p->ai_next) {
+        // This get socket information
         if ((sockfd = socket(p->ai_family, p->ai_socktype, p->ai_protocol)) == -1) {
             perror("server: socket");
             continue;
         }
 
+        // This enables re-utilization of ports
         if (setsockopt(sockfd, SOL_SOCKET, SO_REUSEADDR, &yes, sizeof(int)) == -1) {
+            perror("setsockopt");
+            exit(1);
+        }
+
+        if (bind(sockfd, p->ai_addr, p->ai_addrlen) == -1) {
+            close(sockfd);
             perror("server: bind");
             continue;
         }
 
         break;
     }
-
     freeaddrinfo(servinfo);
+
+
     if (p == NULL) {
         fprintf(stderr, "server: failed to bind");
         exit(1);
@@ -81,7 +90,7 @@ int server() {
         exit(1);
     }
 
-    printf("server: waiting for connections...\n");
+    printf("server (%s): waiting for connections...\n", port);
 
     while (1) {
         sin_size = sizeof their_addr;
@@ -97,6 +106,7 @@ int server() {
 
         if (!fork()) {
             close(sockfd);
+            // We will keep this connection and work with it
             if (send(new_fd, "Hello, World!", 13, 0)) {
                 perror("send");
             }

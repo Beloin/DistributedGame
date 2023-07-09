@@ -18,7 +18,7 @@
 
 #define MAXDATASIZE 100 // max number of bytes we can get at once
 
-int client() {
+int client(char *port) {
     int sockfd, numbytes;
     char buf[MAXDATASIZE];
     struct addrinfo hints, *servinfo, *p;
@@ -31,7 +31,7 @@ int client() {
     hints.ai_family = AF_UNSPEC;
     hints.ai_socktype = SOCK_STREAM;
 
-    if ((rv = getaddrinfo(hostname, PORT, &hints, &servinfo)) != 0) {
+    if ((rv = getaddrinfo(hostname, port, &hints, &servinfo)) != 0) {
         fprintf(stderr, "getaddrinfo: %s\n", gai_strerror(rv));
         return 1;
     }

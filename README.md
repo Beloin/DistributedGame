@@ -35,6 +35,10 @@ position.
 Will be needed a main server to act as a "DNS" server, so this brings a questions, since it's necessary a DNS server,
 why don't use a centralized option?
 
+- The method will be a Fully distributed game. Each service will know the port of the other services.
+- Later on will be implemented a voting system and remove the necessity of the prev knowledge
+of all the services.
+
 Main Modules:
 
 1. Player
@@ -43,9 +47,12 @@ Main Modules:
     - The game implementation
 3. Client:
     - Involving how the communication will work, centralized or not.
+    - Clients will warn other services it's existence.
 4. Server
-    - Involving how the communication will work, centralized or not. 
-
+    - Involving how the communication will work, centralized or not.
+    - For now the services will use the server and receive the players update as
+a protocol.
+   
 
 ## TODO:
 

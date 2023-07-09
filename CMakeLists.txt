@@ -6,9 +6,6 @@ set(CMAKE_C_STANDARD 11)
 add_executable(
         distributed_sys
         src/main.c
-        src/main.c
-        src/client.c
-        src/server.c
         src/player/player.c src/player/player.h
         src/game/game.c src/game/game.h
 )
@@ -19,6 +16,17 @@ add_library(
         src/utils/addr_utils.c
 )
 target_include_directories(utils_lib PUBLIC src/utils)
+
+add_library(
+        server_lib STATIC
+        src/server/client.c
+        src/server/server.c
+)
+target_include_directories(
+        server_lib PUBLIC
+        src/server
+)
+target_link_libraries(server_lib PUBLIC utils_lib)
 
 include(FetchContent)
 FetchContent_Declare(
@@ -35,4 +43,4 @@ if (TEST_LINKED_LIST)
     add_subdirectory(tests)
 endif ()
 
-target_link_libraries(distributed_sys PUBLIC utils_lib)
+target_link_libraries(distributed_sys PUBLIC utils_lib server_lib)
