@@ -36,10 +36,10 @@ void handle_sigterm() {
 }
 
 void *simplethread(void *arg) {
-    printf("Stated thread\n");
+    printf("started thread\n");
     while (1) {
         if (should_quit) {
-            printf("Quitting from simple thread\n");
+            printf("quitting from simple thread\n");
             return NULL;
         }
         sleep(2);
@@ -75,7 +75,7 @@ int main(int argc, char **argv) {
     pause(); // This method waits for signal... Is it in the main thread?
 
     if (should_quit) {
-        printf("Killing\n");
+        printf("killing\n");
         pthread_join(server_thread, NULL);
     }
 
