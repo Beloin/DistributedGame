@@ -7,6 +7,9 @@
 #include "server.h"
 #include <stdio.h>
 #include <string.h>
+#include <bits/types/sig_atomic_t.h>
+#include <signal.h>
+#include <unistd.h>
 #include "pthread.h"
 
 // What to do:
@@ -16,34 +19,71 @@
 //      | command |    id   | x - pos | y - pos | internal clock |
 //      Command: 0 -> new Player
 //      Command: 1 -> Update position
-//      Command: 2 -> Exit
+//      Command: 2 -> Exit group
 //      Command: 3 -> Do a barrel row
 //  3. Simulate the interface using printf();
 
 Game game;
+volatile sig_atomic_t should_quit; // This is quite interesting, but it's necessary in this thing?
 
 void *server_worker(void *arg) {
     char *port = (char *) arg;
     server(port);
-    return NULL;
+}
+
+void handle_sigterm() {
+    should_quit = 1; // Use a semaphore instead?
+}
+
+void *simplethread(void *arg) {
+    printf("Stated thread\n");
+    while (1) {
+        if (should_quit) {
+            printf("Quitting from simple thread\n");
+            return NULL;
+        }
+//        pthread_testcancel(); // Can use this to, but remember to set pthread_setcanceltype
+        sleep(2);
+        printf("I am running!\n");
+    }
 }
 
 int main(int argc, char **argv) {
+    int err;
     if (argc < 2) {
         printf("err: need option");
         exit(1);
     }
 
-    pthread_t server_thread;
 
     Player *me = malloc(sizeof(Player));
     create_game(&game);
     add_player(&game, me);
 
-//    pthread_create(&server_thread, NULL, server_worker, argv[1]);
-    client("3092");
+    pthread_t server_thread;
+    err = pthread_create(&server_thread, NULL, simplethread, argv[1]);
+    if (err != 0) {
+        printf("\ncan't create thread :[%s]", strerror(err));
+        exit(1);
+    }
 
-    pthread_join(server_thread, NULL);
+    int old;
+    pthread_setcanceltype(PTHREAD_CANCEL_ASYNCHRONOUS, &old);
+
+    // TODO: How to run client?
+//    client("3092");
+
+    printf("My PID is %d\n", getpid());
+
+    (void) signal(SIGTERM, handle_sigterm);
+    pause(); // This method waits for signal... Is it in the main thread?
+
+    if (should_quit) {
+        printf("Killing\n");
+        pthread_join(server_thread, NULL);
+//        pthread_cancel(server_thread);
+    }
+
     delete_game(&game, 1);
     return 0;
 }

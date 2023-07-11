@@ -104,7 +104,7 @@ int server(char *port) {
         inet_ntop(their_addr.ss_family, get_in_addr((struct sockaddr *) &their_addr), s, sizeof s);
         printf("server: got connection from %s\n", s);
 
-        if (!fork()) {
+        if (!fork()) { // This probably is a bad idea since we can't have shared memory through process
             ssize_t b;
             // We will keep this connection and work with it...
             if ((b = send(new_fd, "Hello, World!", 13, 0)) == -1) {

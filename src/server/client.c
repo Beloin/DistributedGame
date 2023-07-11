@@ -70,7 +70,7 @@ int client(char *port) {
     buf[numbytes] = '\0';
     printf("client: recieved `%s`\n", buf);
 
-    close(sockfd);
+    close(sockfd); // Later on keep this open
 
     return 0;
 }
