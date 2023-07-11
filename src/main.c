@@ -42,7 +42,6 @@ void *simplethread(void *arg) {
             printf("Quitting from simple thread\n");
             return NULL;
         }
-//        pthread_testcancel(); // Can use this to, but remember to set pthread_setcanceltype
         sleep(2);
         printf("I am running!\n");
     }
@@ -67,9 +66,6 @@ int main(int argc, char **argv) {
         exit(1);
     }
 
-    int old;
-    pthread_setcanceltype(PTHREAD_CANCEL_ASYNCHRONOUS, &old);
-
     // TODO: How to run client?
 //    client("3092");
 
@@ -81,7 +77,6 @@ int main(int argc, char **argv) {
     if (should_quit) {
         printf("Killing\n");
         pthread_join(server_thread, NULL);
-//        pthread_cancel(server_thread);
     }
 
     delete_game(&game, 1);
