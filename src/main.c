@@ -31,8 +31,10 @@ void *server_worker(void *arg) {
     server(port);
 }
 
-void handle_sigterm() {
+void handle_sigterm(int sig, siginfo_t *sinfo, void *context) {
     should_quit = 1; // Use a semaphore instead?
+    printf("sig:%d\nsinfo->si_pid = %ld\nexit code %d exit reason %d\n", sig,
+           (long) sinfo->si_pid, sinfo->si_status, sinfo->si_code);
 }
 
 void *simplethread(void *arg) {
@@ -71,8 +73,17 @@ int main(int argc, char **argv) {
 
     printf("My PID is %d\n", getpid());
 
-    (void) signal(SIGTERM, handle_sigterm);
-    pause(); // This method waits for signal... Is it in the main thread?
+    struct sigaction act;
+    act.sa_sigaction = handle_sigterm;
+    sigemptyset(&act.sa_mask);
+    act.sa_flags = SA_SIGINFO; // This sends the information instead of only the signal number
+
+    if (sigaction(SIGTERM, &act, NULL) == -1) {
+        perror("sigaction");
+        exit(EXIT_FAILURE);
+    }
+    //    (void) signal(SIGTERM, handle_sigterm); // TODO: Would be better to use sigaction
+    pause();
 
     if (should_quit) {
         printf("killing\n");
