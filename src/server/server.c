@@ -122,3 +122,7 @@ int server(char *port) {
 
     return 0;
 }
+
+void handle_client(int client_sd) {
+    recv();
+}
