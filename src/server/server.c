@@ -14,9 +14,12 @@
 #include <signal.h>
 
 #include "addr_utils.h"
+#include "server.h"
 
 #define MAX_SERVICES 4
 #define BACKLOG 10
+
+typedef char size_client;
 
 // SEE TUTORIAL HERE: https://beej.us/guide/bgnet/html//index.html#cb47-20
 void sigchld_handler(int s) {
@@ -28,6 +31,8 @@ void sigchld_handler(int s) {
 }
 
 int services[MAX_SERVICES];
+
+size_t rbytes(int client_sd, const char *buf);
 
 int server(char *port) {
     int sockfd, new_fd;
@@ -123,6 +128,37 @@ int server(char *port) {
     return 0;
 }
 
-void handle_client(int client_sd) {
-    recv();
+void handle_client(int client_sd, size_client client_id) {
+    // 44 bits
+    char buf[6];
+    size_t bytes_read;
+    while (1) {
+        bytes_read = rbytes(client_sd, buf);
+
+        if (bytes_read != PROTOCOL_BYTES) {
+            printf("could not read this message on client-%d\n", client_id);
+            continue;
+        }
+
+        // TODO: Unwrap protocol
+        printf("Value: %s\n", buf);
+    }
+
+}
+
+size_t rbytes(int client_sd, const char *buf) {
+    size_t bytes, missing_bytes, total = 0;
+    while (total != PROTOCOL_BYTES) { // Read all bytes into buf
+        missing_bytes = PROTOCOL_BYTES - total;
+        size_t index = total - 1;
+
+        if ((bytes = recv(client_sd, (void *) (buf + index), missing_bytes, 0)) == -1) { // or &buf[index]
+            perror("could not get bytes");
+            break;
+        }
+
+        total += bytes;
+    }
+
+    return total;
 }
