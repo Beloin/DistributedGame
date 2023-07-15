@@ -32,7 +32,7 @@ void *server_worker(void *arg) {
 }
 
 void handle_sigterm(int sig, siginfo_t *sinfo, void *context) {
-    should_quit = 1; // Use a semaphore instead?
+    should_quit = 1;
 }
 
 int main(int argc, char **argv) {
@@ -79,7 +79,7 @@ int main(int argc, char **argv) {
         printf("killing\n");
         if (should_serve) {
             pthread_join(server_thread, NULL);
-            // pthread_kill() // This should kill the server thread and all clients threads
+            pthread_cancel(server_thread); // TODO: This should kill the server thread and all clients threads
         }
     }
 
