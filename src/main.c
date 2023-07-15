@@ -48,14 +48,18 @@ int main(int argc, char **argv) {
     add_player(&game, me);
 
     pthread_t server_thread;
-    err = pthread_create(&server_thread, NULL, server_worker, argv[1]);
-    if (err != 0) {
-        printf("\ncan't create thread :[%s]", strerror(err));
-        exit(1);
-    }
 
-    // TODO: How to run client?
-//    client("3092");
+    u_int8_t should_serve = strcmp(argv[2], "server") == 0;
+    if (should_serve) {
+        err = pthread_create(&server_thread, NULL, server_worker, argv[1]);
+        if (err != 0) {
+            printf("\ncan't create thread :[%s]", strerror(err));
+            exit(1);
+        }
+    } else {
+        // TODO: How to run client?
+        client("3092");
+    }
 
     printf("My PID is %d\n", getpid());
 
@@ -73,7 +77,10 @@ int main(int argc, char **argv) {
 
     if (should_quit) {
         printf("killing\n");
-        pthread_join(server_thread, NULL);
+        if (should_serve) {
+            pthread_join(server_thread, NULL);
+            // pthread_kill() // This should kill the server thread and all clients threads
+        }
     }
 
     delete_game(&game, 1);

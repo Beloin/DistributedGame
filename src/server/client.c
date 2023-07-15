@@ -13,14 +13,12 @@
 
 #include <arpa/inet.h>
 #include "addr_utils.h"
+#include "server.h"
 
-#define PORT "3490" // the port client will be connecting to
-
-#define MAXDATASIZE 100 // max number of bytes we can get at once
+// TODO: In client we will need to save the server sock_fd and sent when necessary
 
 int client(char *port) {
-    int sockfd, numbytes;
-    char buf[MAXDATASIZE];
+    int sockfd;
     struct addrinfo hints, *servinfo, *p;
     int rv;
     char s[INET6_ADDRSTRLEN];
@@ -62,13 +60,8 @@ int client(char *port) {
 
     freeaddrinfo(servinfo);
 
-    if ((numbytes = recv(sockfd, buf, MAXDATASIZE - 1, 0)) == -1) {
-        perror("recv");
-        exit(1);
-    }
-
-    buf[numbytes] = '\0';
-    printf("client: recieved `%s`\n", buf);
+    send(sockfd, "Hello!", 6, 0);
+    printf("client sent 6 bytes\n");
 
     close(sockfd); // Later on keep this open
 

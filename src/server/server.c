@@ -12,6 +12,7 @@
 #include <arpa/inet.h>
 #include <sys/wait.h>
 #include <signal.h>
+#include <pthread.h>
 
 #include "addr_utils.h"
 #include "server.h"
@@ -31,6 +32,8 @@ void sigchld_handler(int s) {
 }
 
 int services[MAX_SERVICES];
+
+void *handle_client(void *args);
 
 size_t rbytes(int client_sd, const char *buf);
 
@@ -110,25 +113,24 @@ int server(char *port) {
         inet_ntop(their_addr.ss_family, get_in_addr((struct sockaddr *) &their_addr), s, sizeof s);
         printf("server: got connection from %s\n", s);
 
-        if (!fork()) { // TODO: This probably is a bad idea since we can't have shared memory through process
-            ssize_t b;
-            // We will keep this connection and work with it...
-            if ((b = send(new_fd, "Hello, World!", 13, 0)) == -1) {
-                perror("send");
-            } else {
-                printf("server: sent %ld bytes\n", b);
-            }
+        // TODO: Create better way to receive multiple clients... A list of threads
+        int args[] = {new_fd, 0};
+        pthread_t client_thread;
+        pthread_create(&client_thread, NULL, handle_client, args);
+        pthread_join(client_thread, NULL);
 
-            close(new_fd); // Later on don't to close this socket
-        }
-
-        close(new_fd);
+        close(new_fd); // Later on don't to close this socket
     }
 
     return 0;
 }
 
-void handle_client(int client_sd, size_client client_id) {
+void *handle_client(void *args) {
+    int client_sd, client_id;
+    int *arg = (int *) args;
+    client_sd = arg[0];
+    client_id = arg[1];
+
     // 44 bits
     char buf[6];
     size_t bytes_read;
@@ -140,6 +142,7 @@ void handle_client(int client_sd, size_client client_id) {
             continue;
         }
 
+        printf("server recv 6 bytes\n");
         // TODO: Unwrap protocol
         printf("Value: %s\n", buf);
     }
@@ -150,7 +153,7 @@ size_t rbytes(int client_sd, const char *buf) {
     size_t bytes, missing_bytes, total = 0;
     while (total != PROTOCOL_BYTES) { // Read all bytes into buf
         missing_bytes = PROTOCOL_BYTES - total;
-        size_t index = total - 1;
+        size_t index = total;
 
         if ((bytes = recv(client_sd, (void *) (buf + index), missing_bytes, 0)) == -1) { // or &buf[index]
             perror("could not get bytes");

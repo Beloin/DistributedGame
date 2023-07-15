@@ -16,6 +16,9 @@ int server(char *port);
 
 int client(char *port);
 
+
+void sent_message(Message * msg);
+
 /**
  * Function that wraps the struct `Message` into bytes.
  * @param message
