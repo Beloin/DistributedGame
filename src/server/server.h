@@ -15,12 +15,17 @@ typedef struct {
 
 static sig_atomic_t should_quit;
 
+/**
+ * typedef defining the type to hold a value for applications arrays and indexes 😀
+ */
+typedef unsigned char app_size;
+
 int server(char *port);
 
 int client(char *port);
 
 
-void sent_message(Message * msg);
+void send_message(const Message *msg, int sockfd);
 
 /**
  * Function that wraps the struct `Message` into bytes.

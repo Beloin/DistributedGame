@@ -17,17 +17,17 @@
 #define MAX_SERVICES 4
 #define BACKLOG 10
 
-typedef char size_client;
 
 struct client_t {
-    size_client id;
     int fd;
+    app_size id; // Add a padding?
+    uint8_t is_enabled;
     pthread_t thread;
 };
 
 struct client_t clients[MAX_SERVICES];
 char current_client_index = 0;
-char current_client_id = 1;
+app_size current_client_id = 1;
 
 void *handle_client(void *args);
 
@@ -36,18 +36,19 @@ size_t rbytes(int client_sd, const char *buf);
 void handle_socket(int new_fd);
 
 void initialize_clients() {
-    size_client i;
+    app_size i;
     for (i = 0; i < MAX_SERVICES; i++) {
         struct client_t *cur_client = &clients[i];
-        cur_client->id = -1;
+        cur_client->id = 1;
         cur_client->fd = -1;
         cur_client->thread = -1;
+        cur_client->is_enabled = 0;
     }
 }
 
 // TODO: This is not thread safe, please use semaphore
-void remove_client(size_client id, int sock_fd) {
-    size_client i, c_index;
+void remove_client(app_size id, int sock_fd) {
+    app_size i, c_index;
     close(sock_fd);
 
     // [ 1, (2), 3]
@@ -63,8 +64,9 @@ void remove_client(size_client id, int sock_fd) {
         } else if (i + 1 == MAX_SERVICES) {
             struct client_t *client = &clients[i + 1];
             client->id = -1;
-            client->fd = -1;
+            client->fd = -1; // Could close socket here instead of receiving socket from parameter
             client->thread = 0; // Won't be needing to pthread_cancel these clients since when a `remove_client` is called, the threads should already be returned
+            client->is_enabled = 0;
         }
     }
 
@@ -73,10 +75,10 @@ void remove_client(size_client id, int sock_fd) {
 
 static void clean_clients(void *) {
     printf("cleaning still active clients\n");
-    size_client i;
+    app_size i;
     for (i = 0; i < MAX_SERVICES; i++) {
         struct client_t *cur_client = &clients[i];
-        if (cur_client->id != -1) {
+        if (cur_client->is_enabled) {
             printf("killing client (%d)\n", cur_client->id);
             close(cur_client->fd);
             pthread_cancel(cur_client->thread);
@@ -99,65 +101,65 @@ int server(char *port) {
 
     initialize_clients();
     pthread_setcanceltype(PTHREAD_CANCEL_DEFERRED, NULL);
-    pthread_cleanup_push(clean_clients, NULL);
+    pthread_cleanup_push(clean_clients, NULL) ;
 
-    char *name = "0.0.0.0"; // Could be localhost too. But since we are using AI_PASSIVE, the host is the same machine as this
-    if ((rv = getaddrinfo(NULL, port, &hints, &servinfo)) != 0) {
-        fprintf(stderr, "getaddrinfo: %s\n", gai_strerror(rv));
-    }
+            char *name = "0.0.0.0"; // Could be localhost too. But since we are using AI_PASSIVE, the host is the same machine as this
+            if ((rv = getaddrinfo(NULL, port, &hints, &servinfo)) != 0) {
+                fprintf(stderr, "getaddrinfo: %s\n", gai_strerror(rv));
+            }
 
-    for (p = servinfo; p != NULL; p = p->ai_next) {
-        // This get socket information
-        if ((server_fd = socket(p->ai_family, p->ai_socktype, p->ai_protocol)) == -1) {
-            perror("server: socket");
-            continue;
-        }
+            for (p = servinfo; p != NULL; p = p->ai_next) {
+                // This get socket information
+                if ((server_fd = socket(p->ai_family, p->ai_socktype, p->ai_protocol)) == -1) {
+                    perror("server: socket");
+                    continue;
+                }
 
-        // This enables re-utilization of ports
-        if (setsockopt(server_fd, SOL_SOCKET, SO_REUSEADDR, &yes, sizeof(int)) == -1) {
-            perror("setsockopt");
-            exit(1);
-        }
+                // This enables re-utilization of ports
+                if (setsockopt(server_fd, SOL_SOCKET, SO_REUSEADDR, &yes, sizeof(int)) == -1) {
+                    perror("setsockopt");
+                    exit(1);
+                }
 
-        if (bind(server_fd, p->ai_addr, p->ai_addrlen) == -1) {
-            close(server_fd);
-            perror("server: bind");
-            continue;
-        }
+                if (bind(server_fd, p->ai_addr, p->ai_addrlen) == -1) {
+                    close(server_fd);
+                    perror("server: bind");
+                    continue;
+                }
 
-        break;
-    }
-    freeaddrinfo(servinfo);
+                break;
+            }
+            freeaddrinfo(servinfo);
 
 
-    if (p == NULL) {
-        fprintf(stderr, "server: failed to bind");
-        exit(1);
-    }
+            if (p == NULL) {
+                fprintf(stderr, "server: failed to bind");
+                exit(1);
+            }
 
-    if (listen(server_fd, BACKLOG) == -1) {
-        perror("listen");
-        exit(1);
-    }
+            if (listen(server_fd, BACKLOG) == -1) {
+                perror("listen");
+                exit(1);
+            }
 
-    printf("server (%s): waiting for connections...\n", port);
+            printf("server (%s): waiting for connections...\n", port);
 
-    while (should_quit != 1) {
-        struct sockaddr_storage their_addr;
-        socklen_t sin_size = sizeof their_addr;
-        // Accept is a cancellation point, so we should be able to kill the server thread here
-        int new_fd = accept(server_fd, (struct sockaddr *) &their_addr, &sin_size);
+            while (should_quit != 1) {
+                struct sockaddr_storage their_addr;
+                socklen_t sin_size = sizeof their_addr;
+                // Accept is a cancellation point, so we should be able to kill the server thread here
+                int new_fd = accept(server_fd, (struct sockaddr *) &their_addr, &sin_size);
 
-        if (new_fd == -1) {
-            perror("accept");
-            continue;
-        }
+                if (new_fd == -1) {
+                    perror("accept");
+                    continue;
+                }
 
-        inet_ntop(their_addr.ss_family, get_in_addr((struct sockaddr *) &their_addr), s, sizeof s);
-        printf("server: got connection from %s\n", s);
+                inet_ntop(their_addr.ss_family, get_in_addr((struct sockaddr *) &their_addr), s, sizeof s);
+                printf("server: got connection from %s\n", s);
 
-        handle_socket(new_fd);
-    }
+                handle_socket(new_fd);
+            }
 
     pthread_cleanup_pop(0);
 
@@ -174,6 +176,7 @@ void handle_socket(int new_fd) {
 
         pthread_create(&client_thread, NULL, handle_client, client);
         client->thread = client_thread;
+        client->is_enabled = 1;
 
         pthread_detach(client_thread); // Detaching this thread since we will not be waiting fo any client
         current_client_index++;
@@ -184,7 +187,7 @@ void handle_socket(int new_fd) {
 }
 
 void *handle_client(void *args) {
-    char client_id;
+    app_size client_id;
     int client_sd;
     client_sd = ((struct client_t *) args)->fd;
     client_id = ((struct client_t *) args)->id;
@@ -196,7 +199,7 @@ void *handle_client(void *args) {
         bytes_read = rbytes(client_sd, buf);
 
         if (bytes_read != PROTOCOL_BYTES) {
-            if (bytes_read == -1){
+            if (bytes_read == -1) {
                 printf("could not read this message on client (%d)\n", client_id);
             } else {
                 printf("client (%d) disconnected\n", client_id);
