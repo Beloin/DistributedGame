@@ -31,7 +31,7 @@ void *server_worker(void *arg) {
     return NULL;
 }
 
-void handle_sigterm(int sig, siginfo_t *sinfo, void *context) {
+void sig_handler(int sig, siginfo_t *sinfo, void *context) {
     should_quit = 1;
 }
 
@@ -65,9 +65,9 @@ int main(int argc, char **argv) {
 
     printf("My PID is %d\n", getpid());
 
-    // This Setup SIGTERM handler.
+    // This Setup SIGTERM and SIGINT handlers.
     struct sigaction act_setup;
-    act_setup.sa_sigaction = handle_sigterm;
+    act_setup.sa_sigaction = sig_handler;
     sigemptyset(&act_setup.sa_mask);
     act_setup.sa_flags = SA_SIGINFO | // This sends the information instead of only the signal number
                          SA_RESTART;
@@ -81,7 +81,8 @@ int main(int argc, char **argv) {
     if (should_quit) {
         printf("quitting application...\n");
         if (should_serve) {
-            pthread_cancel(server_thread); // TODO: This should kill the server thread and all clients threads
+            // This should kill the server thread and all clients threads
+            pthread_cancel(server_thread);
             pthread_join(server_thread, NULL);
         }
     }

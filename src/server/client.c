@@ -2,12 +2,9 @@
 // Created by beloin on 25/06/23.
 //
 #include <stdio.h>
-#include <stdlib.h>
 #include <unistd.h>
-#include <errno.h>
 #include <string.h>
 #include <netdb.h>
-#include <sys/types.h>
 #include <netinet/in.h>
 #include <sys/socket.h>
 
@@ -15,8 +12,10 @@
 #include "addr_utils.h"
 #include "server.h"
 
-// TODO: In client we will need to save the server sock_fd and sent when necessary
+// TODO: In client we will need to save the server sock_fd and sent when necessary, we will have MAX_SERVICES servers
 
+// TODO NEXT: Do the same for the client, close all socket connections when client thread is killed
+//  We neeed too to find a way to add various server to this guy and send to eache new messages
 int client(char *port) {
     int sockfd;
     struct addrinfo hints, *servinfo, *p;

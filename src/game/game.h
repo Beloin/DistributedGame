@@ -10,7 +10,7 @@
 
 typedef struct {
     int i, j;
-    LinkedList players; // TODO: Use a linked list
+    LinkedList players;
 } Game;
 
 
