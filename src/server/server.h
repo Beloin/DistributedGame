@@ -5,12 +5,15 @@
 #ifndef DISTRIBUTED_SYS_SERVER_H
 #define DISTRIBUTED_SYS_SERVER_H
 
+#include <bits/types/sig_atomic_t.h>
+
 #define PROTOCOL_BYTES 6
 
 typedef struct {
     // ...
 } Message;
 
+static sig_atomic_t should_quit;
 
 int server(char *port);
 

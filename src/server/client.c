@@ -63,6 +63,8 @@ int client(char *port) {
     send(sockfd, "Hello!", 6, 0);
     printf("client sent 6 bytes\n");
 
+
+    ssize_t i = send(sockfd, "Hello!", 6, 0);
     close(sockfd); // Later on keep this open
 
     return 0;

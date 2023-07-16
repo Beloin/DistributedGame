@@ -4,14 +4,11 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <unistd.h>
-#include <errno.h>
 #include <string.h>
 #include <sys/socket.h>
 #include <netinet/in.h>
 #include <netdb.h>
 #include <arpa/inet.h>
-#include <sys/wait.h>
-#include <signal.h>
 #include <pthread.h>
 
 #include "addr_utils.h"
@@ -38,14 +35,6 @@ size_t rbytes(int client_sd, const char *buf);
 
 void handle_socket(int new_fd);
 
-#define clean_clients_def(arg) { \
-                                  \
-}
-
-void clean_clients(void *arg) {
-
-}
-
 void initialize_clients() {
     size_client i;
     for (i = 0; i < MAX_SERVICES; i++) {
@@ -56,22 +45,41 @@ void initialize_clients() {
     }
 }
 
-void remove_client(size_client id, int sock) {
-    size_client i, j;
-    close(sock);
+// TODO: This is not thread safe, please use semaphore
+void remove_client(size_client id, int sock_fd) {
+    size_client i, c_index;
+    close(sock_fd);
+
+    // [ 1, (2), 3]
+    // [ 1, 3, -1 ]
     for (i = 0; i < MAX_SERVICES; i++) {
         struct client_t *cur_client = &clients[i];
         if (cur_client->id == id) {
-            cur_client->id = -1;
-            cur_client->fd = -1;
-            cur_client->thread = -1;
+            c_index = i;
+        }
 
-            for (j = MAX_SERVICES - 1; j > i; --j) {
-                clients[i] = clients[j];
-                i++;
-            }
+        if (i >= c_index && i + 1 != MAX_SERVICES) {
+            clients[i] = clients[i + 1];
+        } else if (i + 1 == MAX_SERVICES) {
+            struct client_t *client = &clients[i + 1];
+            client->id = -1;
+            client->fd = -1;
+            client->thread = 0; // Won't be needing to pthread_cancel these clients since when a `remove_client` is called, the threads should already be returned
+        }
+    }
 
-            break; // This doesn't need, since we will be doing i++
+    current_client_index--;
+}
+
+static void clean_clients(void *) {
+    printf("cleaning still active clients\n");
+    size_client i;
+    for (i = 0; i < MAX_SERVICES; i++) {
+        struct client_t *cur_client = &clients[i];
+        if (cur_client->id != -1) {
+            printf("killing client (%d)\n", cur_client->id);
+            close(cur_client->fd);
+            pthread_cancel(cur_client->thread);
         }
     }
 }
@@ -90,7 +98,8 @@ int server(char *port) {
     hints.ai_flags = AI_PASSIVE;
 
     initialize_clients();
-//    pthread_cleanup_push(clean_clients, NULL);
+    pthread_setcanceltype(PTHREAD_CANCEL_DEFERRED, NULL);
+    pthread_cleanup_push(clean_clients, NULL);
 
     char *name = "0.0.0.0"; // Could be localhost too. But since we are using AI_PASSIVE, the host is the same machine as this
     if ((rv = getaddrinfo(NULL, port, &hints, &servinfo)) != 0) {
@@ -128,11 +137,12 @@ int server(char *port) {
 
     if (listen(server_fd, BACKLOG) == -1) {
         perror("listen");
+        exit(1);
     }
 
     printf("server (%s): waiting for connections...\n", port);
 
-    while (1) {
+    while (should_quit != 1) {
         struct sockaddr_storage their_addr;
         socklen_t sin_size = sizeof their_addr;
         // Accept is a cancellation point, so we should be able to kill the server thread here
@@ -146,9 +156,10 @@ int server(char *port) {
         inet_ntop(their_addr.ss_family, get_in_addr((struct sockaddr *) &their_addr), s, sizeof s);
         printf("server: got connection from %s\n", s);
 
-        // TODO FROM HERE -> Create handler for this threads and a way to kill it when necessary remembering to call close(fd);
         handle_socket(new_fd);
     }
+
+    pthread_cleanup_pop(0);
 
     return 0;
 }
@@ -162,8 +173,9 @@ void handle_socket(int new_fd) {
         client->fd = new_fd;
 
         pthread_create(&client_thread, NULL, handle_client, client);
-
         client->thread = client_thread;
+
+        pthread_detach(client_thread); // Detaching this thread since we will not be waiting fo any client
         current_client_index++;
     } else {
         printf("could not create another client: we are full\n");
@@ -184,17 +196,22 @@ void *handle_client(void *args) {
         bytes_read = rbytes(client_sd, buf);
 
         if (bytes_read != PROTOCOL_BYTES) {
-            printf("could not read this message on client %d\n", client_id);
+            if (bytes_read == -1){
+                printf("could not read this message on client (%d)\n", client_id);
+            } else {
+                printf("client (%d) disconnected\n", client_id);
+            }
             break; // Normally errors like this are some kind of connection end like: EINTR
         }
 
-        printf("server recv 6 bytes\n");
+        printf("server recv 6 bytes\n\t");
         // TODO: Unwrap protocol
         printf("Value: %s\n", buf);
     }
 
-    close()
+    remove_client(client_id, client_sd);
 
+    return NULL; // Thread stop
 }
 
 size_t rbytes(int client_sd, const char *buf) {
@@ -203,9 +220,10 @@ size_t rbytes(int client_sd, const char *buf) {
         missing_bytes = PROTOCOL_BYTES - total;
         size_t index = total;
 
-        if ((bytes = recv(client_sd, (void *) (buf + index), missing_bytes, 0)) == -1) { // or &buf[index]
-            perror("could not get bytes");
-            total = -1;
+        // When closed, this returns 0 bytes everytime it recv
+        if ((bytes = recv(client_sd, (void *) (buf + index), missing_bytes, 0)) == -1 || bytes == 0) { // or &buf[index]
+            if (bytes == -1) perror("could not get bytes");
+            total = bytes;
             break;
         }
 
