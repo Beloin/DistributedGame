@@ -22,8 +22,7 @@ typedef unsigned char app_size;
 
 int server(char *port);
 
-int client(char *port);
-
+int connect_to(char *host, char *port);
 
 void send_message(const Message *msg, int sockfd);
 

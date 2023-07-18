@@ -178,10 +178,10 @@ void handle_socket(int new_fd) {
         client->thread = client_thread;
         client->is_enabled = 1;
 
-        pthread_detach(client_thread); // Detaching this thread since we will not be waiting fo any client
+        pthread_detach(client_thread); // Detaching this thread since we will not be waiting fo any connect_to
         current_client_index++;
     } else {
-        printf("could not create another client: we are full\n");
+        printf("could not create another connect_to: we are full\n");
         close(new_fd);
     }
 }

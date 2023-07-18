@@ -13,7 +13,7 @@
 #include "pthread.h"
 
 // What to do:
-//  1. Test calling the connection from another function (Run two applications calling client/server)
+//  1. Test calling the connection from another function (Run two applications calling connect_to/server)
 //  2. Send player information as a protocol:
 //      |   2bit  |   8bit  |  9bit   |  9bit   |     16bit      | = 44 bits ~= 6 bytes
 //      | command |    id   | x - pos | y - pos | internal clock |
@@ -59,8 +59,9 @@ int main(int argc, char **argv) {
         }
 
     } else {
-        // TODO: How to run client?
-        client("3092");
+        char hostname[] = "localhost";
+        // TODO: How to run connect_to?
+        connect_to(hostname, "3092");
     }
 
     printf("My PID is %d\n", getpid());

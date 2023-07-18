@@ -21,7 +21,7 @@ add_library(
         server_lib STATIC
         src/server/client.c
         src/server/server.c
-        src/server/client_handler.c)
+        src/server/client_handler.c src/server/server_utils.c)
 target_include_directories(
         server_lib PUBLIC
         src/server
