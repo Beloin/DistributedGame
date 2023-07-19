@@ -15,12 +15,22 @@
 // What to do:
 //  1. Test calling the connection from another function (Run two applications calling connect_to/server)
 //  2. Send player information as a protocol:
-//      |   2bit  |   8bit  |  9bit   |  9bit   |     16bit      | = 44 bits ~= 6 bytes
+//      |   3bit  |   8bit  |  9bit   |  9bit   |     16bit      | = 45 bits ~= 6 bytes
 //      | command |    id   | x - pos | y - pos | internal clock |
 //      Command: 0 -> new Player
 //      Command: 1 -> Update position
 //      Command: 2 -> Exit group
-//      Command: 3 -> Do a barrel row
+//      Command: 3 -> Server Response... Se below in 2.2
+//      Command: 4 -> Do a barrel row
+//      Command: 5 -> Do a barrel row
+//      2.1 The positions will be integer values representing 0 -> 500
+//      2.2 Server Response: // TODO: Implement this only later
+//          2.2.1 Message:
+//              |   011   |            8Bit            |
+//              | command | numbers of services (`ns`) |
+//          2.2.2 Hosts list:
+//              |         X Bits * `ns`         | Where X will be the host+port bytes
+//              | List of hosts and their ports |
 //  3. Simulate the interface using printf();
 
 Game game;
@@ -59,8 +69,7 @@ int main(int argc, char **argv) {
         }
 
     } else {
-        char hostname[] = "localhost";
-        // TODO: How to run connect_to?
+        char hostname[] = "127.0.0.1";
         connect_to(hostname, "3092");
     }
 
@@ -80,7 +89,9 @@ int main(int argc, char **argv) {
     pause();
 
     if (should_quit) {
-        printf("quitting application...\n");
+        printf("\nquitting application...\n");
+        close_connections();
+
         if (should_serve) {
             // This should kill the server thread and all clients threads
             pthread_cancel(server_thread);

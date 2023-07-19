@@ -161,7 +161,7 @@ int server(char *port) {
                 handle_socket(new_fd);
             }
 
-    pthread_cleanup_pop(0);
+    pthread_cleanup_pop(0); // This helps to add cleanup to threads
 
     return 0;
 }
@@ -178,7 +178,7 @@ void handle_socket(int new_fd) {
         client->thread = client_thread;
         client->is_enabled = 1;
 
-        pthread_detach(client_thread); // Detaching this thread since we will not be waiting fo any connect_to
+        pthread_detach(client_thread); // Detaching this thread since we will not be waiting for any client
         current_client_index++;
     } else {
         printf("could not create another connect_to: we are full\n");

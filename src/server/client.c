@@ -46,7 +46,7 @@ void add_server(int fd, app_size id) {
     if (server == NULL) {
         // TODO: Make a better handler
         close(fd);
-        perror("add_server:");
+        perror("add_server");
         return;
     }
     server->fd = fd;
@@ -55,10 +55,11 @@ void add_server(int fd, app_size id) {
     add_item(&servers, server); // When cleaning linked_list, remember to free the servers inside linked list
 }
 
-void close_servers() {
+void close_connections() {
     struct Node *node = servers.head;
     while (node != NULL) {
         const struct server_t *server = (struct server_t *) node->value;
+        printf("closing connection (%d)\n", server->id);
         close(server->fd);
         node = node->next;
     }
