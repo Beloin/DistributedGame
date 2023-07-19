@@ -37,13 +37,13 @@ void send_message(const Message *msg, int sockfd);
  * @param message
  * @param bytes Must be PROTOCOL_BYTES sized
  */
-void wrap_protocol(Message *const message, const char bytes[]);
+void wrap_protocol(Message *const message, const unsigned char  bytes[]);
 
 /**
- * Function that wraps the struct `Message` into bytes.
+ * Function that unwraps the struct `Message` into bytes.
  * @param message
  * @param bytes Must be PROTOCOL_BYTES sized
  */
-void unwrap_protocol(Message *const message, char bytes[]);
+void unwrap_protocol(Message *const message, unsigned char  bytes[]);
 
 #endif //DISTRIBUTED_SYS_SERVER_H
