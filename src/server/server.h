@@ -12,9 +12,10 @@
 typedef struct {
     unsigned char command;
     unsigned char id;
-    uint16_t x_pos;
-    uint16_t y_pos;
-    uint16_t internal_clock;
+    unsigned short x_pos;
+    unsigned short y_pos;
+    unsigned short internal_clock;
+    // TODO: Implement checksum
 } Message;
 
 static sig_atomic_t should_quit;
@@ -37,13 +38,13 @@ void send_message(const Message *msg, int sockfd);
  * @param message
  * @param bytes Must be PROTOCOL_BYTES sized
  */
-void wrap_protocol(Message *const message, const unsigned char  bytes[]);
+void wrap_protocol(Message *const message, const unsigned char bytes[]);
 
 /**
  * Function that unwraps the struct `Message` into bytes.
  * @param message
  * @param bytes Must be PROTOCOL_BYTES sized
  */
-void unwrap_protocol(Message *const message, unsigned char  bytes[]);
+void unwrap_protocol(Message *const message, unsigned char bytes[]);
 
 #endif //DISTRIBUTED_SYS_SERVER_H

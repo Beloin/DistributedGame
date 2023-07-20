@@ -14,21 +14,29 @@ void send_message(const Message *msg, int sockfd) {
 
 void wrap_protocol(Message *const message, const unsigned char bytes[]) {
     // TODO: Implement using ntohs
-//    ntohs() // TODO: Use this? Only after you understand how it works
-
+    //  ntohs();
 
     message->command = bytes[0] >> 5; // 0bXXX00000 >> 5 = 0b00000XXX
-    message->id = 0;
-    //                          First 5 Bits of 8
-    message->id = message->id | (bytes[0] << 3);
-    message->id = message->id | bytes[1];
+    //  First 5 Bits of 8
+    message->id = (bytes[0] << 3); // 0b000XXXXX << 3 = 0bXXXXX000
+    message->id = message->id | (bytes[1] >> 5);
 }
 
 void unwrap_protocol(Message *const message, unsigned char bytes[]) {
     // TODO: Implement using htons
-//    htons();
+    //  htons();
     bytes[0] = message->command << 5;
-    // 0b10101010
-    bytes[0] = bytes[0] | message->id >> 3;
+    bytes[0] = bytes[0] | (message->id >> 3);
+
     bytes[1] = message->id << 5;
+    bytes[1] = bytes[1] | (message->x_pos >> 4);
+
+    bytes[2] = message->x_pos << 4;
+    bytes[2] = bytes[2] | (message->y_pos >> 5);
+
+    bytes[3] = message->y_pos << 3;
+    bytes[3] = bytes[3] | (message->internal_clock >> 13);
+
+    bytes[4] = message->internal_clock >> 5;
+    bytes[5] = message->internal_clock << 3;
 }
