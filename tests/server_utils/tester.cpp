@@ -48,7 +48,7 @@ TEST(ServerUtilsTests, should_wrap_example) {
 
     ASSERT_EQ(message.command, 0b00000111);
     ASSERT_EQ(message.id, 0b10100101);
-    ASSERT_EQ(message.x_pos, 0b0000000111111010); // TODO: We have a problem here
+    ASSERT_EQ(message.x_pos, 0b0000000111111010);
     ASSERT_EQ(message.y_pos, 0b0000000101010101); // TODO: We have a problem here
     ASSERT_EQ(message.internal_clock, 0b1110001110100101);
 }

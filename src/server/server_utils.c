@@ -28,13 +28,14 @@ void wrap_protocol(Message *const message, const unsigned char bytes[]) {
     message->id = bytes[0] << 3; // 0b11110100 << 3 = 0b10100000
     message->id |= bytes[1] >> 5; // 0b10111111 >> 5 = 0b00000101
 
-    message->x_pos = bytes[1] << 3; // 0b10111111 << 3 = 0b11111000
+    message->x_pos = 0;
+    message->x_pos = (unsigned char) (bytes[1] << 3); // 0b10111111 << 3 = 0b11111000
     message->x_pos <<= 1; // Should be in the 9th to 5th
-    message->x_pos |= bytes[2] >> 4; // 0b10101010 >> 4 = 0b00001010
+    message->x_pos |= (unsigned char) (bytes[2] >> 4); // 0b10101010 >> 4 = 0b00001010
 
-    message->y_pos = bytes[2] << 4; // 0b10101010 << 4 = 0b10100000
+    message->y_pos = (unsigned char) (bytes[2] << 4); // 0b10101010 << 4 = 0b10100000
     message->y_pos <<= 1; // Should be in the 9th to 6th
-    message->y_pos |= bytes[3] >> 3; // 0b10101111 >> 3 = 0b00010101
+    message->y_pos |= (unsigned char) (bytes[3] >> 3); // 0b10101111 >> 3 = 0b00010101
 
     message->internal_clock = bytes[3] << 5; // 0b10101111 << 5 = 0b11100000
     message->internal_clock <<= 3;
