@@ -192,7 +192,7 @@ void *handle_client(void *args) {
     client_sd = ((struct client_t *) args)->fd;
     client_id = ((struct client_t *) args)->id;
 
-    // 44 bits
+    // 45 bits, inside 48
     char buf[6];
     size_t bytes_read;
     while (1) {
@@ -208,7 +208,7 @@ void *handle_client(void *args) {
         }
 
         printf("server recv 6 bytes\n\t");
-        // TODO: Unwrap protocol
+        // TODO: Wrap protocol
         printf("Value: %s\n", buf);
     }
 

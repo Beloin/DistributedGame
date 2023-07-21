@@ -32,3 +32,23 @@ TEST(ServerUtilsTests, should_unwrap_example) {
     ASSERT_EQ(buf[4], 0b00011101);
     ASSERT_EQ(buf[5], 0b00101000);
 }
+
+TEST(ServerUtilsTests, should_wrap_example) {
+    Message message;
+    unsigned char buf[6];
+
+    buf[0] = 0b11110100;
+    buf[1] = 0b10111111;
+    buf[2] = 0b10101010;
+    buf[3] = 0b10101111;
+    buf[4] = 0b00011101;
+    buf[5] = 0b00101000;
+
+    wrap_protocol(&message, buf);
+
+    ASSERT_EQ(message.command, 0b00000111);
+    ASSERT_EQ(message.id, 0b10100101);
+    ASSERT_EQ(message.x_pos, 0b0000000111111010); // TODO: We have a problem here
+    ASSERT_EQ(message.y_pos, 0b0000000101010101); // TODO: We have a problem here
+    ASSERT_EQ(message.internal_clock, 0b1110001110100101);
+}
