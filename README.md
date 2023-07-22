@@ -8,7 +8,7 @@ In this project was implemented software tests using CMake (CTest).
 
 A simple triangle controller game. Each player will be a triangle running in a 500x500 screen. The player can move up,
 down to the left and right `(🡑 🡓 🡐 🡒)`. The important thing here is the distributed part, where there's not going to
-have a main server, every user will connect to each other and talk his place to everyone.
+have a main serve, every user will connect to each other and talk his place to everyone.
 
 To achieve this Goal the programmer has two ways to implement it:
 
@@ -29,10 +29,10 @@ distribuited group.
 
 ## The implementation
 
-Each `player` will have a server code and a connect_to code, so it can reach out to other players and communicate it's
+Each `player` will have a serve code and a connect_to code, so it can reach out to other players and communicate it's
 position.
 
-Will be needed a main server to act as a "DNS" server, so this brings a questions, since it's necessary a DNS server,
+Will be needed a main serve to act as a "DNS" serve, so this brings a questions, since it's necessary a DNS serve,
 why don't use a centralized option?
 
 - The method will be a Fully distributed game. Each service will know the port of the other services.
@@ -50,7 +50,7 @@ Main Modules:
     - Clients will warn other services it's existence.
 4. Server
     - Involving how the communication will work, centralized or not.
-    - For now the services will use the server and receive the players update as
+    - For now the services will use the serve and receive the players update as
 a protocol.
    
 

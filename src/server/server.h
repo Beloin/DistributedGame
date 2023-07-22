@@ -15,7 +15,7 @@ typedef struct {
     unsigned short x_pos;
     unsigned short y_pos;
     unsigned short internal_clock;
-    // TODO: Implement checksum
+    // TODO: Implement checksum?
 } Message;
 
 static sig_atomic_t should_quit;
@@ -25,13 +25,15 @@ static sig_atomic_t should_quit;
  */
 typedef unsigned char app_size;
 
-int server(char *port);
+int serve(char *port);
 
 int connect_to(char *host, char *port);
 
 void close_connections();
 
-void send_message(const Message *msg, int sockfd);
+size_t send_message(const Message *msg, int sockfd);
+
+size_t read_message(Message *msg, int sockfd);
 
 /**
  * Function that wraps the bytes into struct `Message`.
@@ -45,6 +47,26 @@ void wrap_protocol(Message *const message, const unsigned char bytes[]);
  * @param message
  * @param bytes Must be PROTOCOL_BYTES sized
  */
-void unwrap_protocol(Message *const message, unsigned char bytes[]);
+void unwrap_protocol(const Message *message, unsigned char bytes[]);
+
+/**
+ * Reads N bytes from socket fd. If error, return -1
+ * If client disconnected, returns 0
+ * @param socketfd
+ * @param buf
+ * @param n
+ * @return
+ */
+size_t rbytes(int socketfd, const unsigned char *buf, size_t n);
+
+/**
+ * Send N bytes to socket fd. If error, return -1
+ * If client disconnected, returns 0
+ * @param socketfd
+ * @param buf
+ * @param n
+ * @return
+ */
+size_t sbytes(int socketfd, const unsigned char *buf, size_t n);
 
 #endif //DISTRIBUTED_SYS_SERVER_H

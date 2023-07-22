@@ -31,8 +31,6 @@ app_size current_client_id = 1;
 
 void *handle_client(void *args);
 
-size_t rbytes(int client_sd, const char *buf);
-
 void handle_socket(int new_fd);
 
 void initialize_clients() {
@@ -86,7 +84,7 @@ static void clean_clients(void *) {
     }
 }
 
-int server(char *port) {
+int serve(char *port) {
     int server_fd;
     struct addrinfo hints, *servinfo, *p;
 
@@ -111,7 +109,7 @@ int server(char *port) {
             for (p = servinfo; p != NULL; p = p->ai_next) {
                 // This get socket information
                 if ((server_fd = socket(p->ai_family, p->ai_socktype, p->ai_protocol)) == -1) {
-                    perror("server: socket");
+                    perror("serve: socket");
                     continue;
                 }
 
@@ -123,7 +121,7 @@ int server(char *port) {
 
                 if (bind(server_fd, p->ai_addr, p->ai_addrlen) == -1) {
                     close(server_fd);
-                    perror("server: bind");
+                    perror("serve: bind");
                     continue;
                 }
 
@@ -133,7 +131,7 @@ int server(char *port) {
 
 
             if (p == NULL) {
-                fprintf(stderr, "server: failed to bind");
+                fprintf(stderr, "serve: failed to bind");
                 exit(1);
             }
 
@@ -142,12 +140,12 @@ int server(char *port) {
                 exit(1);
             }
 
-            printf("server (%s): waiting for connections...\n", port);
+            printf("serve (%s): waiting for connections...\n", port);
 
             while (should_quit != 1) {
                 struct sockaddr_storage their_addr;
                 socklen_t sin_size = sizeof their_addr;
-                // Accept is a cancellation point, so we should be able to kill the server thread here
+                // Accept is a cancellation point, so we should be able to kill the serve thread here
                 int new_fd = accept(server_fd, (struct sockaddr *) &their_addr, &sin_size);
 
                 if (new_fd == -1) {
@@ -156,7 +154,7 @@ int server(char *port) {
                 }
 
                 inet_ntop(their_addr.ss_family, get_in_addr((struct sockaddr *) &their_addr), s, sizeof s);
-                printf("server: got connection from %s\n", s);
+                printf("serve: got connection from %s\n", s);
 
                 handle_socket(new_fd);
             }
@@ -193,10 +191,10 @@ void *handle_client(void *args) {
     client_id = ((struct client_t *) args)->id;
 
     // 45 bits, inside 48
-    char buf[6];
     size_t bytes_read;
+    Message message;
     while (1) {
-        bytes_read = rbytes(client_sd, buf);
+        bytes_read = read_message(&message, client_sd); // TODO: We could use `select` instead of `recv`.
 
         if (bytes_read != PROTOCOL_BYTES) {
             if (bytes_read == -1) {
@@ -207,9 +205,10 @@ void *handle_client(void *args) {
             break; // Normally errors like this are some kind of connection end like: EINTR
         }
 
-        printf("server recv 6 bytes\n\t");
-        // TODO: Wrap protocol
-        printf("Value: %s\n", buf);
+        // TODO: Create a callback?
+        printf("serve recv 6 bytes\n");
+        printf("{\n\tcommand: %d,\n\tid: %d,\n\tx_pos: %d,\n\ty_pos: %d,\n\tinternal_clock: %d\n}\n",
+               message.command, message.id, message.x_pos, message.y_pos, message.internal_clock);
     }
 
     remove_client(client_id, client_sd);
@@ -217,21 +216,3 @@ void *handle_client(void *args) {
     return NULL; // Thread stop
 }
 
-size_t rbytes(int client_sd, const char *buf) {
-    size_t bytes, missing_bytes, total = 0;
-    while (total != PROTOCOL_BYTES) { // Read all bytes into buf
-        missing_bytes = PROTOCOL_BYTES - total;
-        size_t index = total;
-
-        // When closed, this returns 0 bytes everytime it recv
-        if ((bytes = recv(client_sd, (void *) (buf + index), missing_bytes, 0)) == -1 || bytes == 0) { // or &buf[index]
-            if (bytes == -1) perror("could not get bytes");
-            total = bytes;
-            break;
-        }
-
-        total += bytes;
-    }
-
-    return total;
-}

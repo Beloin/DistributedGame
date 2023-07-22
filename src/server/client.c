@@ -16,7 +16,7 @@
 #include "stdlib.h"
 
 
-// TODO: In connect_to we will need to save the server sock_fd and sent when necessary, we will have MAX_SERVICES servers
+// TODO: In connect_to we will need to save the serve sock_fd and sent when necessary, we will have MAX_SERVICES servers
 
 struct server_t {
     int fd;
@@ -76,8 +76,6 @@ void broadcast_message(const Message message) {
     }
 }
 
-// TODO NEXT: Do the same for the client, close all socket connections when connect_to thread is killed
-//  We need too to find a way to add various server to this guy and send to each new messages
 int connect_to(char *host, char *port) {
     int server_fd;
 
@@ -104,13 +102,13 @@ int get_socketfd(char *host, char *port, int *server_fd) {
 
     for (p = servinfo; p != NULL; p = p->ai_next) {
         if ((*server_fd = socket(p->ai_family, p->ai_socktype, p->ai_protocol)) == -1) {
-            perror("connect_to: socket");
+            perror("client: socket");
             continue;
         }
 
         if (connect(*server_fd, p->ai_addr, p->ai_addrlen) == -1) {
             close(*server_fd);
-            perror("connect_to: connect");
+            perror("client: connect");
             continue;
         }
 

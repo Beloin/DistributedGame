@@ -49,6 +49,28 @@ TEST(ServerUtilsTests, should_wrap_example) {
     ASSERT_EQ(message.command, 0b00000111);
     ASSERT_EQ(message.id, 0b10100101);
     ASSERT_EQ(message.x_pos, 0b0000000111111010);
-    ASSERT_EQ(message.y_pos, 0b0000000101010101); // TODO: We have a problem here
+    ASSERT_EQ(message.y_pos, 0b0000000101010101);
     ASSERT_EQ(message.internal_clock, 0b1110001110100101);
+}
+
+TEST(ServerUtilsTests, should_wrap_and_unwrap) {
+    Message message;
+    message.command = 0b00000111;
+    message.id = 0b10100101;
+    message.x_pos = 0b0000000111111010;
+    message.y_pos = 0b0000000101010101;
+    message.internal_clock = 0b1110001110100101;
+    // | 11110100 | 10111111 | 10101010 | 10101111 | 00011101 | 00101(000)
+
+    unsigned char buf[6];
+    unwrap_protocol(&message, buf);
+
+    Message response;
+    wrap_protocol(&response, buf);
+
+    ASSERT_EQ(response.command, message.command);
+    ASSERT_EQ(response.id, message.id);
+    ASSERT_EQ(response.x_pos, message.x_pos);
+    ASSERT_EQ(response.y_pos, message.y_pos);
+    ASSERT_EQ(response.internal_clock, message.internal_clock);
 }
