@@ -14,7 +14,7 @@ add_library(
         utils_lib STATIC
         src/utils/linked_list.c
         src/utils/addr_utils.c
-)
+        src/utils/parser.c src/utils/parser.h)
 target_include_directories(utils_lib PUBLIC src/utils)
 
 add_library(

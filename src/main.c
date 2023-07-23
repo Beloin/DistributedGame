@@ -7,7 +7,6 @@
 #include "server.h"
 #include <stdio.h>
 #include <string.h>
-#include <bits/types/sig_atomic_t.h>
 #include <signal.h>
 #include <unistd.h>
 #include "pthread.h"
@@ -42,7 +41,7 @@
 //  3. Simulate the interface using printf();
 
 // TODO NEXT: Now that we have a simple send and receive message, create a callback for the client response
-//  Create too a way to easyly configure client and server, chose ports etc, like: sh `dist_game 3031 localhost:3092 localhost:3093 localhost:3093`
+//  Create too a way to easily configure client and server, chose ports etc, like: sh `dist_game 3031 localhost:3092 localhost:3093 localhost:3093`
 //  then we will start to implement the game itself, starting only by moving some things
 //  for now, the server will be listed in the start of the application, the *args will represent list of hosts and ports to connect.
 

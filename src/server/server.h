@@ -7,6 +7,7 @@
 
 #include <bits/types/sig_atomic_t.h>
 
+#define MAX_SERVICES 5
 #define PROTOCOL_BYTES 6
 
 typedef struct {
@@ -18,7 +19,7 @@ typedef struct {
     // TODO: Implement checksum?
 } Message;
 
-static sig_atomic_t should_quit;
+static volatile sig_atomic_t should_quit;
 
 /**
  * typedef defining the type to hold a value for applications arrays and indexes 😀

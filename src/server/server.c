@@ -14,7 +14,6 @@
 #include "addr_utils.h"
 #include "server.h"
 
-#define MAX_SERVICES 4
 #define BACKLOG 10
 
 
